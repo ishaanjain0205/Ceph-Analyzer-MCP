@@ -188,10 +188,20 @@ async function runTests() {
   // Start the MCP server
   logInfo('Starting MCP server...');
   const serverPath = join(__dirname, 'build', 'index.js');
+  
+  // Check if CEPH_REPO_PATH is set
+  if (!process.env.CEPH_REPO_PATH) {
+    logError('CEPH_REPO_PATH environment variable is not set!');
+    logInfo('Please set it before running tests:');
+    logInfo('  export CEPH_REPO_PATH=/path/to/your/ceph/repository');
+    logInfo('  node test-server.js');
+    process.exit(1);
+  }
+  
   const serverProcess = spawn('node', [serverPath], {
     env: {
       ...process.env,
-      CEPH_REPO_PATH: process.env.CEPH_REPO_PATH || '/Users/ishaanjain/Documents/ceph'
+      CEPH_REPO_PATH: process.env.CEPH_REPO_PATH
     },
     stdio: ['pipe', 'pipe', 'pipe']
   });

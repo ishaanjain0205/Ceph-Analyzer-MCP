@@ -12,7 +12,7 @@ import { execSync } from "child_process";
 import { Octokit } from "@octokit/rest";
 
 // Configuration
-const CEPH_REPO_PATH = process.env.CEPH_REPO_PATH || "/Users/ishaanjain/Documents/ceph";
+const CEPH_REPO_PATH = process.env.CEPH_REPO_PATH;
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const CEPH_OWNER = "ceph";
 const CEPH_REPO = "ceph";
@@ -27,6 +27,12 @@ const octokit = GITHUB_TOKEN
 
 // Utility functions
 function validateRepoPath(): void {
+  if (!CEPH_REPO_PATH) {
+    throw new Error(
+      'CEPH_REPO_PATH environment variable is required for local repository tools. ' +
+      'Please set it in your MCP settings configuration.'
+    );
+  }
   if (!fs.existsSync(CEPH_REPO_PATH)) {
     throw new Error(`Ceph repository not found at: ${CEPH_REPO_PATH}`);
   }
@@ -35,10 +41,20 @@ function validateRepoPath(): void {
   }
 }
 
+function getRepoPath(): string {
+  if (!CEPH_REPO_PATH) {
+    throw new Error(
+      'CEPH_REPO_PATH environment variable is required. ' +
+      'Please set it in your MCP settings configuration.'
+    );
+  }
+  return CEPH_REPO_PATH;
+}
+
 function executeGitCommand(args: string[]): string {
   try {
     return execSync(`git ${args.join(" ")}`, {
-      cwd: CEPH_REPO_PATH,
+      cwd: getRepoPath(),
       encoding: "utf-8",
       maxBuffer: 10 * 1024 * 1024, // 10MB
     }).trim();
@@ -53,7 +69,7 @@ function searchInFile(
   isRegex: boolean = false
 ): Array<{ line: number; content: string; context: string[] }> {
   const results: Array<{ line: number; content: string; context: string[] }> = [];
-  const fullPath = path.join(CEPH_REPO_PATH, filePath);
+  const fullPath = path.join(getRepoPath(), filePath);
 
   if (!fs.existsSync(fullPath)) {
     return results;
@@ -116,14 +132,15 @@ function findSymbolDefinitions(symbol: string): Array<{
   ];
 
   try {
+    const repoPath = getRepoPath();
     const grepCmd = patterns
-      .map((p) => `grep -rn -E "${p}" --include="*.{cc,h,py,cpp,hpp}" ${CEPH_REPO_PATH}`)
+      .map((p) => `grep -rn -E "${p}" --include="*.{cc,h,py,cpp,hpp}" ${repoPath}`)
       .join(" ; ");
 
     const output = execSync(grepCmd, {
       encoding: "utf-8",
       maxBuffer: 10 * 1024 * 1024,
-      cwd: CEPH_REPO_PATH,
+      cwd: repoPath,
     });
 
     const lines = output.split("\n").slice(0, MAX_SEARCH_RESULTS);
@@ -132,7 +149,7 @@ function findSymbolDefinitions(symbol: string): Array<{
       const match = line.match(/^(.+?):(\d+):(.+)$/);
       if (match) {
         const [, file, lineNum, content] = match;
-        const relPath = path.relative(CEPH_REPO_PATH, file);
+        const relPath = path.relative(repoPath, file);
         
         let type = "unknown";
         if (content.includes("def ")) type = "function";
@@ -168,13 +185,14 @@ function findSymbolReferences(symbol: string): Array<{
     context: string;
   }> = [];
 
+  const repoPath = getRepoPath();
   try {
     const output = execSync(
-      `grep -rn "\\b${symbol}\\b" --include="*.{cc,h,py,cpp,hpp}" ${CEPH_REPO_PATH}`,
+      `grep -rn "\\b${symbol}\\b" --include="*.{cc,h,py,cpp,hpp}" ${repoPath}`,
       {
         encoding: "utf-8",
         maxBuffer: 10 * 1024 * 1024,
-        cwd: CEPH_REPO_PATH,
+        cwd: repoPath,
       }
     );
 
@@ -184,7 +202,7 @@ function findSymbolReferences(symbol: string): Array<{
       const match = line.match(/^(.+?):(\d+):(.+)$/);
       if (match) {
         const [, file, lineNum, content] = match;
-        const relPath = path.relative(CEPH_REPO_PATH, file);
+        const relPath = path.relative(repoPath, file);
 
         results.push({
           file: relPath,
@@ -207,7 +225,7 @@ function readCodeFile(
   startLine?: number,
   endLine?: number
 ): { content: string; totalLines: number } {
-  const fullPath = path.join(CEPH_REPO_PATH, filePath);
+  const fullPath = path.join(getRepoPath(), filePath);
 
   if (!fs.existsSync(fullPath)) {
     throw new Error(`File not found: ${filePath}`);
@@ -652,6 +670,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           file_pattern?: string;
         };
 
+        const repoPath = getRepoPath();
         let grepCmd = `grep -rn ${is_regex ? "-E" : "-F"} "${pattern}"`;
         
         if (file_pattern) {
@@ -660,7 +679,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           grepCmd += ` --include="*.{cc,h,py,cpp,hpp,c}"`;
         }
         
-        grepCmd += ` ${CEPH_REPO_PATH}`;
+        grepCmd += ` ${repoPath}`;
 
         try {
           const output = execSync(grepCmd, {
@@ -676,7 +695,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
               if (match) {
                 const [, file, lineNum, content] = match;
                 return {
-                  file: path.relative(CEPH_REPO_PATH, file),
+                  file: path.relative(repoPath, file),
                   line: parseInt(lineNum),
                   content: content.trim(),
                 };
@@ -821,7 +840,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           pattern?: string;
         };
 
-        const dirPath = path.join(CEPH_REPO_PATH, directory);
+        const dirPath = path.join(getRepoPath(), directory);
         
         if (!fs.existsSync(dirPath)) {
           throw new Error(`Directory not found: ${directory}`);
