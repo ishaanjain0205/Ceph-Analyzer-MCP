@@ -927,26 +927,46 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           file_pattern?: string;
         };
 
-        const results = await searchGitHubCode(query, file_pattern);
+        try {
+          const results = await searchGitHubCode(query, file_pattern);
 
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(
-                {
-                  query,
-                  file_pattern,
-                  total_results: results.length,
-                  results,
-                  note: "Results from global ceph/ceph repository on GitHub",
-                },
-                null,
-                2
-              ),
-            },
-          ],
-        };
+          return {
+            content: [
+              {
+                type: "text",
+                text: JSON.stringify(
+                  {
+                    query,
+                    file_pattern,
+                    total_results: results.length,
+                    results,
+                    note: "Results from global ceph/ceph repository on GitHub",
+                  },
+                  null,
+                  2
+                ),
+              },
+            ],
+          };
+        } catch (error: any) {
+          return {
+            content: [
+              {
+                type: "text",
+                text: JSON.stringify(
+                  {
+                    query,
+                    file_pattern,
+                    error: error.message,
+                    note: "Failed to search GitHub. Check your GITHUB_TOKEN or API rate limits.",
+                  },
+                  null,
+                  2
+                ),
+              },
+            ],
+          };
+        }
       }
 
       case "get_github_file": {

@@ -83,10 +83,10 @@ const tests = [
     tool: 'search_github_code',
     args: { query: 'OSDMap', file_pattern: 'cc' },
     validate: (result) => {
-      return result.query === 'OSDMap' && 
-             result.results && 
+      return result.query === 'OSDMap' &&
+             result.results &&
              Array.isArray(result.results) &&
-             result.note && 
+             result.note &&
              result.note.includes('global ceph/ceph');
     }
   },
