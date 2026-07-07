@@ -422,7 +422,7 @@ const tools: Tool[] = [
   {
     name: "search_ceph_code",
     description:
-      "Search for code patterns in the Ceph repository. Supports both plain text and regex patterns. Returns file paths, line numbers, and context.",
+      "Search for code patterns, functions, classes, or any text in the Ceph distributed storage system codebase. Use this when the user asks about Ceph code, wants to find where something is implemented, or needs to locate specific code patterns. Supports both plain text and regex patterns. Returns file paths, line numbers, and surrounding code context.",
     inputSchema: {
       type: "object",
       properties: {
@@ -446,7 +446,7 @@ const tools: Tool[] = [
   {
     name: "read_ceph_file",
     description:
-      "Read the contents of a file in the Ceph repository with line numbers. Optionally specify line range.",
+      "Read and display the contents of any source code file in the Ceph repository. Use this when the user wants to see the implementation of a specific file, examine code details, or read configuration files. Returns file contents with line numbers for easy reference.",
     inputSchema: {
       type: "object",
       properties: {
@@ -469,7 +469,7 @@ const tools: Tool[] = [
   {
     name: "find_symbol_definition",
     description:
-      "Find where a symbol (function, class, struct) is defined in the Ceph codebase. Returns file paths, line numbers, and context.",
+      "Find where a function, class, method, or struct is defined in the Ceph codebase. Use this when the user asks 'where is X defined', 'show me the definition of X', or wants to understand how a specific component is implemented. Searches across Python, C, and C++ code. Returns exact file locations, line numbers, and code context.",
     inputSchema: {
       type: "object",
       properties: {
@@ -484,7 +484,7 @@ const tools: Tool[] = [
   {
     name: "find_symbol_references",
     description:
-      "Find all references to a symbol in the Ceph codebase. Returns file paths, line numbers, and context.",
+      "Find all places where a function, class, or variable is used/called in the Ceph codebase. Use this when the user asks 'where is X used', 'what calls X', or wants to understand the impact of changing a component. Returns all usage locations with file paths, line numbers, and code context.",
     inputSchema: {
       type: "object",
       properties: {
@@ -499,7 +499,7 @@ const tools: Tool[] = [
   {
     name: "trace_code_flow",
     description:
-      "Trace how a feature or command flows through the code by analyzing function calls. Returns a call tree starting from the entry point.",
+      "Trace execution flow and function call chains in the Ceph codebase. Use this when the user asks 'how does X work', 'trace the execution of X', or wants to understand how a feature flows through the code. Analyzes function calls recursively and returns a call tree showing the execution path with file locations.",
     inputSchema: {
       type: "object",
       properties: {
@@ -519,7 +519,7 @@ const tools: Tool[] = [
   {
     name: "list_ceph_files",
     description:
-      "List files in a directory of the Ceph repository. Useful for exploring the codebase structure.",
+      "List and explore files and directories in the Ceph repository structure. Use this when the user wants to browse the codebase, see what files exist in a directory, or understand the project organization. Returns file names, types (file/directory), and sizes.",
     inputSchema: {
       type: "object",
       properties: {
@@ -538,7 +538,7 @@ const tools: Tool[] = [
   {
     name: "get_git_log",
     description:
-      "Get git commit history for a file or directory. Returns commit hashes, authors, dates, and messages.",
+      "Get git commit history and recent changes for files or directories in the Ceph repository. Use this when the user asks about recent changes, commit history, who modified something, or wants to see the development timeline. Returns commit hashes, authors, dates, and commit messages.",
     inputSchema: {
       type: "object",
       properties: {
@@ -558,7 +558,7 @@ const tools: Tool[] = [
   {
     name: "search_github_code",
     description:
-      "Search for code in the global ceph/ceph GitHub repository. Returns file paths, URLs, and relevance scores.",
+      "Search for code, functions, or text patterns in the official global ceph/ceph GitHub repository (always up-to-date with latest changes). Use this when the user asks about Ceph code, wants to find implementations in the main repository, or needs to search the latest codebase. Returns file paths, GitHub URLs, and relevance scores.",
     inputSchema: {
       type: "object",
       properties: {
@@ -577,7 +577,7 @@ const tools: Tool[] = [
   {
     name: "get_github_file",
     description:
-      "Read a file from the global ceph/ceph GitHub repository. Returns the file content.",
+      "Read and display any file from the official global ceph/ceph GitHub repository. Use this when the user wants to see the latest version of a file, read source code from the main repository, or examine configuration files. Returns file contents with line numbers from the official Ceph repository.",
     inputSchema: {
       type: "object",
       properties: {
@@ -597,7 +597,7 @@ const tools: Tool[] = [
   {
     name: "get_github_commits",
     description:
-      "Get recent commits from the global ceph/ceph GitHub repository. Returns commit history with authors, dates, and messages.",
+      "Get the latest commits and recent development activity from the official global ceph/ceph GitHub repository. Use this when the user asks 'what are the latest changes', 'recent commits', 'what's new in Ceph', or wants to see current development activity. Returns commit history with authors, dates, messages, and GitHub URLs.",
     inputSchema: {
       type: "object",
       properties: {
@@ -616,7 +616,7 @@ const tools: Tool[] = [
   {
     name: "search_github_prs",
     description:
-      "Search for pull requests in the global ceph/ceph GitHub repository by title or description.",
+      "Search for and find pull requests in the official global ceph/ceph GitHub repository. Use this when the user asks about PRs, wants to find a specific feature implementation, asks 'what PR implements X', or needs to see proposed changes. Searches PR titles and descriptions. Returns PR numbers, titles, status, authors, and GitHub URLs.",
     inputSchema: {
       type: "object",
       properties: {
