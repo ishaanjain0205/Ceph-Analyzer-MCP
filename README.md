@@ -87,6 +87,24 @@ A comprehensive Model Context Protocol (MCP) server for analyzing the Ceph distr
 - (Optional) Local Ceph repository clone for local analysis features
 - (Optional) GitHub personal access token for higher API rate limits
 
+### Platform Compatibility
+
+**✅ Fully Supported (Windows, macOS, Linux):**
+- All GitHub API tools (search_github_code, get_github_file, get_github_commits, search_github_prs)
+- File reading (read_ceph_file)
+- Directory listing (list_ceph_files)
+- Git history (get_git_log)
+
+**⚠️ Unix/Linux/macOS Only:**
+- Local code search (search_ceph_code) - requires `grep`
+- Symbol finding (find_symbol_definition, find_symbol_references) - requires `grep`
+- Code flow tracing (trace_code_flow) - depends on symbol finding
+
+**Windows Users:**
+- All GitHub API features work perfectly on Windows
+- For local repository tools, install [Git for Windows](https://git-scm.com/download/win) (includes Git Bash with `grep`) or [WSL](https://docs.microsoft.com/en-us/windows/wsl/install)
+- Alternatively, use only the GitHub API tools which provide full access to the global ceph/ceph repository
+
 ### Setup
 
 1. **Clone or navigate to the MCP server directory:**
@@ -104,7 +122,13 @@ A comprehensive Model Context Protocol (MCP) server for analyzing the Ceph distr
    npm run build
    ```
 
-4. **Configure the MCP server** in `~/.bob/settings/mcp_settings.json`:
+4. **Configure the MCP server** in your MCP settings file:
+
+   **macOS/Linux:** `~/.bob/settings/mcp_settings.json`
+   
+   **Windows:** `%USERPROFILE%\.bob\settings\mcp_settings.json`
+
+   **macOS/Linux Configuration:**
    ```json
    {
      "mcpServers": {
@@ -113,7 +137,26 @@ A comprehensive Model Context Protocol (MCP) server for analyzing the Ceph distr
          "args": ["/absolute/path/to/ceph-analyzer/build/index.js"],
          "env": {
            "CEPH_REPO_PATH": "/path/to/your/ceph/repository",
-           "GITHUB_TOKEN": "your-github-token-here-optional"
+           "GITHUB_TOKEN": "your-github-token-here"
+         },
+         "disabled": false,
+         "alwaysAllow": [],
+         "disabledTools": []
+       }
+     }
+   }
+   ```
+
+   **Windows Configuration:**
+   ```json
+   {
+     "mcpServers": {
+       "ceph-analyzer": {
+         "command": "node",
+         "args": ["C:\\Users\\YourUsername\\path\\to\\ceph-analyzer\\build\\index.js"],
+         "env": {
+           "CEPH_REPO_PATH": "C:\\Users\\YourUsername\\path\\to\\ceph",
+           "GITHUB_TOKEN": "your-github-token-here"
          },
          "disabled": false,
          "alwaysAllow": [],
@@ -123,10 +166,12 @@ A comprehensive Model Context Protocol (MCP) server for analyzing the Ceph distr
    }
    ```
    
-   **Important:** Replace the paths with your actual paths:
-   - `/absolute/path/to/ceph-analyzer/build/index.js` - Full path to the built server
-   - `/path/to/your/ceph/repository` - Path to your local Ceph git repository
-   - `your-github-token-here-optional` - Your GitHub personal access token (optional)
+   **Important:**
+   - Replace paths with your actual paths
+   - **Windows:** Use double backslashes (`\\`) in paths or forward slashes (`/`)
+   - **macOS/Linux:** Use forward slashes (`/`) in paths
+   - `GITHUB_TOKEN` is optional but recommended for higher API rate limits
+   - Node.js must be installed and available in your system PATH
 
 5. **Restart Bob** to load the MCP server
 
